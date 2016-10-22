@@ -8,6 +8,8 @@ target 'Flix' do
   # This pulls in the latest version of AFNetworking >= 2.6 but less than 3.0.
   pod 'AFNetworking'
 
+  pod 'MBProgressHUD'
+
   # Pods for Flix
 
 end

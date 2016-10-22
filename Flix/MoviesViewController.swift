@@ -8,19 +8,36 @@
 
 import UIKit
 import AFNetworking
+import MBProgressHUD
 
 class MoviesViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
     @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var networkErrorLabel: UILabel!
     
     var movies: [NSDictionary]?
+    var refreshControl : UIRefreshControl!
 
     override func viewDidLoad() {
+        self.networkErrorLabel.hidden = true
         super.viewDidLoad()
         
         tableView.dataSource = self
-        tableView.delegate = self  
+        tableView.delegate = self
 
         // Do any additional setup after loading the view.
+        
+        // Display HUD right before the request is made
+        MBProgressHUD.showHUDAddedTo(self.view, animated: true)
+        
+        getData(1, refreshControl: nil) // Call get data to load API and hide progress circle
+        
+        // Initialize a UIRefreshControl
+        refreshControl = UIRefreshControl()
+//        refreshControl.addTarget(self, action: #selector(refreshControlAction(_:)), forControlEvents.ValueChanged)
+        tableView.insertSubview(refreshControl, atIndex: 0)
+    }
+    
+    func getData(type: Int, refreshControl: UIRefreshControl?) {
         let apiKey = "a07e22bc18f5cb106bfe4cc1f83ad8ed"
         let url = NSURL(string: "https://api.themoviedb.org/3/movie/now_playing?api_key=\(apiKey)")
         let request = NSURLRequest(
@@ -36,18 +53,44 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
         
         let task: NSURLSessionDataTask = session.dataTaskWithRequest(request,
             completionHandler: { (dataOrNil, response, error) in
-                if let data = dataOrNil {
+                
+                self.tableView.reloadData()
+                
+                if(type == 1)
+                {
+                    // Hide HUD once the network request comes back (must be done on main UI thread)
+                    MBProgressHUD.hideHUDForView(self.view, animated: true)
+                }
+                else if(type == 0)
+                {
+                    refreshControl!.endRefreshing()
+                }
+
+                
+                if dataOrNil != nil {
+                    self.networkErrorLabel.hidden = true
+                    let data = dataOrNil
+
                     if let responseDictionary = try! NSJSONSerialization.JSONObjectWithData(
-                        data, options:[]) as? NSDictionary {
+                        data!, options:[]) as? NSDictionary {
                             print("response: \(responseDictionary)")
                             
                             self.movies = responseDictionary["results"] as? [NSDictionary]
                             self.tableView.reloadData()
                     }
                 }
-        })
+                else { //If there's no data
+                    self.networkErrorLabel.hidden = false
+                }
+                
+                        })
         task.resume()
     }
+    
+    func refreshControlAction(refreshControl:UIRefreshControl) {
+        getData(0, refreshControl: refreshControl)
+    }
+    
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
