@@ -12,13 +12,13 @@ import MBProgressHUD
 
 class MoviesViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
     @IBOutlet weak var tableView: UITableView!
-    @IBOutlet weak var networkErrorLabel: UILabel!
+//    @IBOutlet weak var networkErrorLabel: UILabel!
     
     var movies: [NSDictionary]?
     var refreshControl : UIRefreshControl!
 
     override func viewDidLoad() {
-        self.networkErrorLabel.hidden = true
+//        self.networkErrorLabel.hidden = true
         super.viewDidLoad()
         
         tableView.dataSource = self
@@ -68,7 +68,7 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
 
                 
                 if dataOrNil != nil {
-                    self.networkErrorLabel.hidden = true
+//                    self.networkErrorLabel.hidden = true
                     let data = dataOrNil
 
                     if let responseDictionary = try! NSJSONSerialization.JSONObjectWithData(
@@ -80,7 +80,7 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
                     }
                 }
                 else { //If there's no data
-                    self.networkErrorLabel.hidden = false
+//                    self.networkErrorLabel.hidden = false
                 }
                 
                         })
